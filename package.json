@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "typecheck": "tsc -b",
+    "test:logic": "node tests/foodLogic.mjs",
+    "test:phase2": "node --env-file=.env.local --env-file=.env.test.local tests/phase2.mjs",
     "test:phase1": "node --env-file=.env.local --env-file=.env.test.local tests/phase1.mjs",
     "test:expiry": "node --env-file=.env.local --env-file=.env.test.local tests/expiry.mjs",
     "test:fcfs": "node --env-file=.env.local --env-file=.env.test.local tests/fcfs.mjs",

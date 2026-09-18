@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { createClient } from '@supabase/supabase-js'
+import { waitForRelease } from './waitForRelease.mjs'
 
 async function login(name) {
   const c = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_PUBLISHABLE_KEY,
@@ -18,6 +19,7 @@ async function donation(name) {
 }
 try {
   const abandoned = await donation('expiry'), confirmed = await donation('confirmed')
+  await Promise.all([abandoned, confirmed].map(id => waitForRelease(donor, id)))
   const reserved = await a.rpc('reserve_donation', { donation_id: abandoned })
   assert.equal(reserved.data.success, true)
   const unauthorized = await b.rpc('confirm_reservation', { donation_id: abandoned })

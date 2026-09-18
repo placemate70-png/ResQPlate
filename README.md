@@ -1,6 +1,6 @@
 # ResQPlate
 
-Phase 1 website: Supabase Auth, permanent Donor/Volunteer/NGO profiles, protected role areas, donations, private food images, GrabBoard, atomic reservation and confirmation, and database-enforced 60-second expiry.
+Phase 1 + Phase 2 website: Supabase Auth, permanent Donor/Volunteer/NGO profiles, protected role areas, donations, private food images, GrabBoard, atomic reservation and confirmation, database-enforced 60-second expiry, FreshClock, PlateCount and RouteBuddy.
 
 Run locally:
 1. `npm ci`
@@ -14,4 +14,12 @@ Roles are selected once after login. NGO accounts can read shared food informati
 Checks: `npm run typecheck`, `npm run lint`, `npm run build`.
 Live API checks: `npm run test:phase1`, `npm run test:expiry` (waits 62 real seconds), and `npm run test:fcfs -- <available-QA-donation-id>`. These create real, clearly labelled development donations. They require provisioned, confirmed QA Auth accounts named `resqplate-qa-{donor,volunteer-a,volunteer-b,ngo}@example.invalid`, with their shared test password supplied as `QA_PASSWORD` in ignored `.env.test.local`. Email signup/confirmation was verified separately with the user-controlled test account. `supabase/tests/profiles_rls.sql` runs as the database owner and rolls back its temporary fixtures.
 
-Never put database passwords or service-role credentials in Vite environment variables. Phase 2 is not implemented.
+FreshClock uses gravy = 1.5 hours and dry/rice = 4 hours, plus 1 hour strictly below 30°C. The unspecified 30–38°C range retains the same base window. Deadlines are calculated and stored by Postgres; the shared frontend utility renders remaining time. These prototype windows are estimates, not food-safety certification.
+
+PlateCount assumes 300 g/ml per serving, or uses a directly entered portion count. Quantity is the total across all containers; optional per-container litre capacity validates liquid quantities. Estimated and manually corrected counts are stored separately. Only the owning donor can correct a count; blank restores the estimate.
+
+RouteBuddy uses real pickup coordinates and server-created timestamps. Every new donation serves a 180-second hold enforced by a database trigger on reservation. A private cron function assigns UUID batches to fresh pending donations of the same food type, with every pair within 1.5 km according to the single `distance_km` database function. Pending neighbours can join the batch but remain hidden until their own full hold ends. Isolated, expired or legacy records without coordinates release individually. Batch members retain independent atomic reservations; no later-phase delivery tracking is implemented. Refresh donor/NGO pages for updated release state; GrabBoard polls automatically.
+
+Additional checks: `npm run test:logic`, `npm run test:phase2` (180 real seconds). Phase 1 API and expiry tests now also wait for the real RouteBuddy hold before claiming their fixtures. A live release test exercises cron with actual timestamps, not shortened frontend timers.
+
+Never put database passwords or service-role credentials in Vite environment variables. Production hosting needs `npm run build`, the `dist` output directory, an SPA fallback, and the hosted `/auth/callback` URL allowed in Supabase Auth.

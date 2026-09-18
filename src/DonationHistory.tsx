@@ -7,7 +7,7 @@ export function DonationHistory({ userId }: { userId: string }) {
     {state.loading ? <p role="status">Loading history…</p> : state.error ? <p role="alert">{state.error}</p>
       : !state.donations.length ? <p>No donations yet.</p>
       : state.donations.map(row => <div key={row.id}>
-        <DonationDetails donation={row} />
+        <DonationDetails donation={row} editable />
         <a href={`/donor/new?donation=${row.id}`}>View donation / attach image</a>
       </div>)}
   </section>

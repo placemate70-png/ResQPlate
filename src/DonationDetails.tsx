@@ -1,7 +1,8 @@
 import type { Donation } from './donationService'
 import { DonationImage } from './DonationImage'
+import { FoodMetrics } from './FoodMetrics'
 
-export function DonationDetails({ donation }: { donation: Donation }) {
+export function DonationDetails({ donation, editable = false }: { donation: Donation; editable?: boolean }) {
   return <article>
     <h3>{donation.food_name}</h3>
     <p>Status: {donation.status}</p>
@@ -10,6 +11,7 @@ export function DonationDetails({ donation }: { donation: Donation }) {
     <p>{donation.container_count} container(s): {donation.container}</p>
     <p>Prepared: {new Date(donation.prepared_at).toLocaleString()}</p>
     <p>Created: {new Date(donation.created_at).toLocaleString()}</p>
+    <FoodMetrics key={`${donation.id}-${donation.corrected_plates}`} donation={donation} editable={editable} />
     {donation.status === 'reserved' && donation.reservation_expires_at &&
       <p>Reserved until: {new Date(donation.reservation_expires_at).toLocaleString()}</p>}
     {donation.claimed_at && <p>Claim confirmed: {new Date(donation.claimed_at).toLocaleString()}</p>}

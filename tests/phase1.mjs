@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { createClient } from '@supabase/supabase-js'
+import { waitForRelease } from './waitForRelease.mjs'
 
 function client() {
   return createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_PUBLISHABLE_KEY,
@@ -48,6 +49,8 @@ try {
   assert.equal(attached.error, null)
   const persisted = await donor.c.from('donations').select('*').eq('id', id).single()
   assert.equal(persisted.data.image_path, path)
+  console.log('Waiting for real RouteBuddy hold before Phase 1 reservation regression…')
+  await waitForRelease(donor.c, id)
   const board = await a.c.rpc('grabboard_state')
   assert(board.data.available.some(row => row.id === id))
   const race = await Promise.all([a, b].map(user => user.c.rpc('reserve_donation', { donation_id: id })))
