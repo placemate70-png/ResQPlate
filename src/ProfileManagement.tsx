@@ -53,7 +53,7 @@ export function ProfileManagement({ userId }: { userId: string }) {
               : <DonorDashboard userId={userId} />)}
           {state.profile.role === 'volunteer' && requestedRole === 'volunteer' &&
             (window.location.pathname === '/volunteer/grabboard' ? <GrabBoard userId={userId} /> : <VolunteerDashboard profile={state.profile} />)}
-          {state.profile.role === 'ngo' && requestedRole === 'ngo' && <NGODashboard />}
+          {state.profile.role === 'ngo' && requestedRole === 'ngo' && <NGODashboard userId={userId} />}
           </div>
         </>
       ) : state.error ? (

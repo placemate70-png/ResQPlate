@@ -6,6 +6,7 @@ import { ImageUpload } from './ImageUpload'
 import { FoodMetrics } from './FoodMetrics'
 import { estimatePlates } from './foodLogic'
 import { Icon, LoadingState, PageHeading } from './UI'
+import { unavailableCapabilities } from './integrations'
 
 export function DonationForm({ userId }: { userId: string }) {
   const state = useCreateDonation()
@@ -36,7 +37,7 @@ export function DonationForm({ userId }: { userId: string }) {
       <div className="form-section"><h3>{state.result.food_name}</h3><FoodMetrics key={state.result.id} donation={state.result} editable /></div>
       <ImageUpload userId={userId} donationId={state.result.id} imagePath={state.result.image_path} /></> :
       <form className="donation-form" onSubmit={submit}><fieldset disabled={state.saving}>
-        <div className="form-section"><h3>01 · The food</h3><p>Tell us what you’re sharing.</p><div className="form-grid"><div className="field">
+        <div className="form-section"><h3>01 · The food</h3><p>Tell us what you’re sharing.</p><p>{unavailableCapabilities.snapFill}</p><div className="form-grid"><div className="field">
         <label htmlFor="food_name">Food name</label>
         <input id="food_name" name="food_name" required maxLength={120} />
         </div><div className="field">

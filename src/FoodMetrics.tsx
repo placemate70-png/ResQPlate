@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { correctPlates } from './donationService'
 import type { Donation } from './donationService'
-import { calculateFreshness } from './foodLogic'
+import { calculateFreshness, deadlineState } from './foodLogic'
 import { asyncError } from './useDonations'
 import { Icon, StatusBadge } from './UI'
 
@@ -24,12 +24,14 @@ export function FoodMetrics({ donation, editable = false }: { donation: Donation
     } catch (reason) { setError(asyncError(reason)) } finally { setSaving(false) }
   }
   const freshnessStatus = freshness.expired ? 'expired' : freshness.remainingMs <= 3600000 ? 'expiring' : 'fresh'
+  const { remainingMs: remaining, urgency } = deadlineState(donation.freshness_expires_at, now)
   return <div className="food-metrics">
     <div className="metrics"><div className={`metric-panel metric-${freshnessStatus}`}>
       <span className="metric-label"><Icon name="clock" />FreshClock <StatusBadge status={freshnessStatus} /></span>
       <strong className="metric-value">{freshness.expired ? 'Window ended' : `${Math.ceil(freshness.remainingMs / 60000)} min`}</strong>
       <progress aria-label="Freshness window remaining" max={freshness.hours * 3600000} value={Math.min(freshness.remainingMs, freshness.hours * 3600000)} />
       <small>Deadline: {new Date(donation.freshness_expires_at).toLocaleString()}</small>
+      <small>LiveDeadline: {urgency} · {Math.ceil(remaining / 60000)} min remaining · Rescue: {donation.status}</small>
     </div><div className="metric-panel"><span className="metric-label"><Icon name="plate" />PlateCount</span>
       <strong className="metric-value">{corrected ?? donation.estimated_plates} <span>plates</span></strong><small>Estimate: {donation.estimated_plates}{corrected !== null ? ' · Donor corrected' : ' · Estimated servings'}</small>
     </div></div>

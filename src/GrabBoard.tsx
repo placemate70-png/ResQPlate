@@ -1,6 +1,7 @@
 import { DonationDetails } from './DonationDetails'
 import { useGrabBoard } from './useGrabBoard'
 import { EmptyState, Icon, LoadingState, PageHeading } from './UI'
+import { RescuePanel } from './RescuePanel'
 
 export function GrabBoard({ userId }: { userId: string }) {
   const state = useGrabBoard(userId)
@@ -8,6 +9,7 @@ export function GrabBoard({ userId }: { userId: string }) {
     action={<button className="button-secondary" disabled={state.loading} onClick={() => void state.refresh()}><Icon name="history" />{state.loading ? 'Refreshing…' : 'Refresh donations'}</button>} />
     {state.error && <p role="alert">{state.error}</p>}
     {state.notice && <p role="status">{state.notice}</p>}
+    {!state.loading && <RescuePanel userId={userId} role="volunteer" donations={state.reservations} />}
     <div className="section-heading"><h3>Your reservations</h3><span className="role-chip">60-second confirmation window</span></div>
     {!state.reservations.length && !state.loading && <EmptyState title="No reservations yet" description="Choose a donation below to hold it while you confirm. Your accepted claims will appear here too." />}
     <div className="donation-grid">
