@@ -5,7 +5,7 @@ import { RescuePanel } from './RescuePanel'
 
 export function NGODashboard({ userId }: { userId: string }) {
   const state = useNGODonations()
-  return <section><PageHeading title="NGO dashboard" eyebrow="A shared view of the community" description="Follow shared food and confirmed claims. Refresh this page for the latest information." />
+  return <section><PageHeading title="NGO dashboard" eyebrow="A shared view of the community" description="Incoming food and rescue progress update live. Confirm receipt after delivery." />
     {state.loading ? <LoadingState label="Loading donations…" /> : state.error ? <p role="alert">{state.error}</p>
       : <><RescuePanel userId={userId} role="ngo" donations={state.donations} /><div className="stats-grid"><Stat label="Shared donations" value={state.donations.length} icon="food" detail="Real donations across the community" />
         <Stat label="Reserved" value={state.donations.filter(row=>row.status==='reserved').length} icon="clock" detail="Awaiting volunteer confirmation" />

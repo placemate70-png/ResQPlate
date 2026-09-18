@@ -3,6 +3,7 @@ import { confirmReservation, grabboardState, reserveDonation } from './reservati
 import type { BoardState } from './reservationService'
 import type { Donation } from './donationService'
 import { asyncError } from './useDonations'
+import { watchDatabase } from './databaseSync'
 
 export function useGrabBoard(userId: string) {
   const [donations, setDonations] = useState<Donation[]>([])
@@ -24,11 +25,11 @@ export function useGrabBoard(userId: string) {
       .catch((reason: unknown) => { if (active) setError(asyncError(reason)) })
       .finally(() => { if (active) setLoading(false) })
     void load()
-    const polling = window.setInterval(() => { void load() }, 5000)
+    const stop=watchDatabase(['donations'],()=>{void load()})
     const clock = window.setInterval(() => {
       if (sample.current) setServerNow(sample.current.server + performance.now() - sample.current.local)
     }, 1000)
-    return () => { active = false; window.clearInterval(polling); window.clearInterval(clock) }
+    return () => { active = false;stop(); window.clearInterval(clock) }
   }, [userId, apply])
   async function refresh() {
     setLoading(true); setError(null)

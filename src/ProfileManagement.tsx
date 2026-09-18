@@ -1,14 +1,15 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import type { FormEvent } from 'react'
 import { isRole } from './profileService'
 import { useProfile } from './useProfile'
 import { DonorDashboard } from './DonorDashboard'
-import { DonationForm } from './DonationForm'
 import { DonationHistory } from './DonationHistory'
 import { VolunteerDashboard } from './VolunteerDashboard'
 import { GrabBoard } from './GrabBoard'
+import { ActiveRescue } from './ActiveRescue'
 import { NGODashboard } from './NGODashboard'
 import { EmptyState, Icon, LoadingState } from './UI'
+const DonationForm=lazy(()=>import('./DonationForm').then(module=>({default:module.DonationForm})))
 
 export function ProfileManagement({ userId }: { userId: string }) {
   const state = useProfile(userId)
@@ -45,14 +46,15 @@ export function ProfileManagement({ userId }: { userId: string }) {
                 <a className={window.location.pathname === '/donor/history' ? 'active' : ''} aria-current={window.location.pathname === '/donor/history' ? 'page' : undefined} href="/donor/history"><Icon name="history" />Donation history</a>
               </>}
               {state.profile.role === 'volunteer' && <a className={window.location.pathname === '/volunteer/grabboard' ? 'active' : ''} aria-current={window.location.pathname === '/volunteer/grabboard' ? 'page' : undefined} href="/volunteer/grabboard"><Icon name="food" />GrabBoard</a>}
+              {state.profile.role === 'volunteer' && <a href="/volunteer/rescue"><Icon name="route" />Active Rescue</a>}
             </nav><div className="sidebar-bottom"><span className="role-chip">{state.profile.role === 'ngo' ? 'NGO' : state.profile.role === 'donor' ? 'Donor' : 'Volunteer'} workspace</span><p>Good food deserves<br />a second chance.</p><Icon name="plate" /></div>
           </aside><div className="workspace" id="main-content">
           {state.profile.role === 'donor' && requestedRole === 'donor' &&
-            (window.location.pathname === '/donor/new' ? <DonationForm userId={userId} />
+            (window.location.pathname === '/donor/new' ? <Suspense fallback={<LoadingState label="Loading donation form…"/>}><DonationForm userId={userId} /></Suspense>
               : window.location.pathname === '/donor/history' ? <DonationHistory userId={userId} />
               : <DonorDashboard userId={userId} />)}
           {state.profile.role === 'volunteer' && requestedRole === 'volunteer' &&
-            (window.location.pathname === '/volunteer/grabboard' ? <GrabBoard userId={userId} /> : <VolunteerDashboard profile={state.profile} />)}
+            (window.location.pathname === '/volunteer/grabboard' ? <GrabBoard userId={userId} /> : window.location.pathname === '/volunteer/rescue' ? <ActiveRescue userId={userId}/> : <VolunteerDashboard profile={state.profile} />)}
           {state.profile.role === 'ngo' && requestedRole === 'ngo' && <NGODashboard userId={userId} />}
           </div>
         </>

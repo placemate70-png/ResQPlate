@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createDonation, getDonation, ngoDonations, ownDonations } from './donationService'
 import type { Donation, DonationInput } from './donationService'
+import { watchDatabase } from './databaseSync'
 
 export function asyncError(reason: unknown) {
   return reason && typeof reason === 'object' && 'message' in reason
@@ -15,10 +16,11 @@ export function useCreateDonation() {
   const [error, setError] = useState<string | null>(null)
   useEffect(() => {
     let active = true
-    if (savedId) void getDonation(savedId).then(row => { if (active) setResult(row) })
+    const load=()=>{if (savedId) void getDonation(savedId).then(row => { if (active) setResult(row) })
       .catch((reason: unknown) => { if (active) setError(asyncError(reason)) })
-      .finally(() => { if (active) setRestoring(false) })
-    return () => { active = false }
+      .finally(() => { if (active) setRestoring(false) })}
+    load();const stop=savedId?watchDatabase(['donations'],load):()=>{}
+    return () => { active = false;stop() }
   }, [savedId])
   async function submit(input: DonationInput) {
     setSaving(true); setError(null); setResult(null)
@@ -39,10 +41,12 @@ export function useDonations(donorId: string) {
   const [error, setError] = useState<string | null>(null)
   useEffect(() => {
     let active = true
-    void ownDonations(donorId).then(rows => { if (active) setDonations(rows) })
+    let sequence=0
+    const load=()=>{const current=++sequence;void ownDonations(donorId).then(rows => { if (active && current===sequence) {setDonations(rows);setError(null)} })
       .catch((reason: unknown) => { if (active) setError(asyncError(reason)) })
-      .finally(() => { if (active) setLoading(false) })
-    return () => { active = false }
+      .finally(() => { if (active) setLoading(false) })}
+    load();const stop=watchDatabase(['donations'],load)
+    return () => { active = false;stop() }
   }, [donorId])
   return { donations, loading, error }
 }
@@ -53,10 +57,12 @@ export function useNGODonations() {
   const [error, setError] = useState<string | null>(null)
   useEffect(() => {
     let active = true
-    void ngoDonations().then(rows => { if (active) setDonations(rows) })
+    let sequence=0
+    const load=()=>{const current=++sequence;void ngoDonations().then(rows => { if (active && current===sequence) {setDonations(rows);setError(null)} })
       .catch((reason: unknown) => { if (active) setError(asyncError(reason)) })
-      .finally(() => { if (active) setLoading(false) })
-    return () => { active = false }
+      .finally(() => { if (active) setLoading(false) })}
+    load();const stop=watchDatabase(['donations'],load)
+    return () => { active = false;stop() }
   }, [])
   return { donations, loading, error }
 }

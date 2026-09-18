@@ -19,7 +19,7 @@ export function Brand() {
 export function PageHeading({ title, description, eyebrow = 'Food rescue, made simple', action }: { title: string; description: string; eyebrow?: string; action?: ReactNode }) {
   return <header className="page-heading"><div><p className="eyebrow">{eyebrow}</p><h1 className="page-title">{title}</h1><p className="page-description">{description}</p></div>{action && <div className="heading-actions">{action}</div>}</header>
 }
-export function Stat({ label, value, icon, detail }: { label: string; value: number; icon: IconName; detail: string }) {
+export function Stat({ label, value, icon, detail }: { label: string; value: number | string; icon: IconName; detail: string }) {
   return <div className="stat"><div className="stat-top"><span>{label}</span><Icon name={icon} /></div><strong>{value}</strong><p>{detail}</p></div>
 }
 export function LoadingState({ label }: { label: string }) {
