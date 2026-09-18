@@ -4,6 +4,7 @@ import { correctPlates } from './donationService'
 import type { Donation } from './donationService'
 import { calculateFreshness } from './foodLogic'
 import { asyncError } from './useDonations'
+import { Icon, StatusBadge } from './UI'
 
 export function FoodMetrics({ donation, editable = false }: { donation: Donation; editable?: boolean }) {
   const [now, setNow] = useState(() => Date.now())
@@ -22,20 +23,29 @@ export function FoodMetrics({ donation, editable = false }: { donation: Donation
       setCorrected(row.corrected_plates); setMessage('Plate count saved.')
     } catch (reason) { setError(asyncError(reason)) } finally { setSaving(false) }
   }
-  return <div>
-    <p>FreshClock: {freshness.expired ? 'Freshness window ended' : `${Math.ceil(freshness.remainingMs / 60000)} minutes remaining`}.
-      {' '}Deadline: {new Date(donation.freshness_expires_at).toLocaleString()}</p>
-    <p>PlateCount: {corrected ?? donation.estimated_plates} plates. Estimate: {donation.estimated_plates}.</p>
-    <p>Estimate assumes 300 g/ml per plate; portions count directly. Quantity is the total across containers.</p>
-    {donation.capacity_litres && <p>Capacity per container: {donation.capacity_litres} litres.</p>}
-    {editable && <form onSubmit={submit}>
+  const freshnessStatus = freshness.expired ? 'expired' : freshness.remainingMs <= 3600000 ? 'expiring' : 'fresh'
+  return <div className="food-metrics">
+    <div className="metrics"><div className={`metric-panel metric-${freshnessStatus}`}>
+      <span className="metric-label"><Icon name="clock" />FreshClock <StatusBadge status={freshnessStatus} /></span>
+      <strong className="metric-value">{freshness.expired ? 'Window ended' : `${Math.ceil(freshness.remainingMs / 60000)} min`}</strong>
+      <progress aria-label="Freshness window remaining" max={freshness.hours * 3600000} value={Math.min(freshness.remainingMs, freshness.hours * 3600000)} />
+      <small>Deadline: {new Date(donation.freshness_expires_at).toLocaleString()}</small>
+    </div><div className="metric-panel"><span className="metric-label"><Icon name="plate" />PlateCount</span>
+      <strong className="metric-value">{corrected ?? donation.estimated_plates} <span>plates</span></strong><small>Estimate: {donation.estimated_plates}{corrected !== null ? ' · Donor corrected' : ' · Estimated servings'}</small>
+    </div></div>
+    <p className="metric-help">Estimate assumes 300 g/ml per plate; portions count directly. Quantity is the total across containers.
+      {donation.capacity_litres ? ` Capacity per container: ${donation.capacity_litres} litres.` : ''}</p>
+    {editable && <form className="plate-correction" onSubmit={submit}>
       <label htmlFor={`plates-${donation.id}`}>Correct plate count (blank restores estimate)</label>
-      <input id={`plates-${donation.id}`} name="plates" type="number" min="0" step="1" defaultValue={corrected ?? ''} disabled={saving} />
-      <button disabled={saving}>{saving ? 'Saving…' : 'Save plate count'}</button>
+      <div className="correction-controls"><input id={`plates-${donation.id}`} name="plates" type="number" min="0" step="1" defaultValue={corrected ?? ''} disabled={saving} />
+      <button className="button-secondary" disabled={saving}>{saving ? 'Saving…' : 'Save plate count'}</button></div>
       {message && <p role="status">{message}</p>}{error && <p role="alert">{error}</p>}
     </form>}
-    <p>RouteBuddy: {donation.route_state === 'holding' ? `Holding until ${new Date(donation.release_at!).toLocaleString()} (refresh after release)`
-      : donation.route_batch_id ? `Nearby batch ${donation.route_batch_id}` : 'Released individually'}.</p>
-    {donation.latitude != null && <p>Pickup coordinates: {donation.latitude}, {donation.longitude}</p>}
+    <div className="route-panel"><div className="route-top"><strong><Icon name="route" />RouteBuddy</strong><StatusBadge status={donation.route_state} /></div>
+      <p>{donation.route_state === 'holding' ? `Matching window ends ${new Date(donation.release_at!).toLocaleString()}. Refresh after release.`
+        : donation.route_batch_id ? 'Grouped with nearby compatible donations.' : 'Ready for an individual rescue.'}</p>
+      {donation.route_batch_id && <p className="batch-id">Batch: {donation.route_batch_id}</p>}
+      {donation.latitude != null && <p>Pickup coordinates: {donation.latitude}, {donation.longitude}</p>}
+    </div>
   </div>
 }

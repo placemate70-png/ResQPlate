@@ -8,6 +8,7 @@ import { DonationHistory } from './DonationHistory'
 import { VolunteerDashboard } from './VolunteerDashboard'
 import { GrabBoard } from './GrabBoard'
 import { NGODashboard } from './NGODashboard'
+import { EmptyState, Icon, LoadingState } from './UI'
 
 export function ProfileManagement({ userId }: { userId: string }) {
   const state = useProfile(userId)
@@ -19,8 +20,8 @@ export function ProfileManagement({ userId }: { userId: string }) {
   }, [state.profile, requestedRole])
 
   if (state.profile && requestedRole !== state.profile.role && requestedRole !== 'dashboard') {
-    return <section><h2>Access denied</h2><p>This area requires a different role.</p>
-      <a href={`/${state.profile.role}`}>Return to your dashboard</a></section>
+    return <section className="guard-panel" id="main-content"><EmptyState title="Access denied" description="This area requires a different role. Your own dashboard is ready for you."
+      action={<a className="button-link" href={`/${state.profile.role}`}>Return to your dashboard <Icon name="arrow" /></a>} /></section>
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -29,15 +30,23 @@ export function ProfileManagement({ userId }: { userId: string }) {
     if (isRole(role)) await state.choose(role)
   }
 
-  if (state.loading) return <p role="status">Loading profile…</p>
+  if (state.loading) return <div className="guard-panel"><LoadingState label="Loading profile…" /></div>
 
   return (
-    <section aria-label="Role profile">
+    <section className={state.profile ? 'app-shell' : 'role-onboarding'} aria-label="Role profile">
       {state.error && <p role="alert">{state.error}</p>}
       {state.profile ? (
         <>
-          <h2>Your role</h2>
-          <p role="status">Role: {state.profile.role === 'ngo' ? 'NGO' : state.profile.role === 'donor' ? 'Donor' : 'Volunteer'}</p>
+          <aside className="app-sidebar"><p className="nav-label">{state.profile.role === 'ngo' ? 'NGO' : state.profile.role === 'donor' ? 'Donor' : 'Volunteer'} workspace</p>
+            <nav aria-label="Main navigation">
+              <a className={window.location.pathname === `/${state.profile.role}` ? 'active' : ''} href={`/${state.profile.role}`} aria-current={window.location.pathname === `/${state.profile.role}` ? 'page' : undefined}><Icon name="grid" />Overview</a>
+              {state.profile.role === 'donor' && <>
+                <a className={window.location.pathname === '/donor/new' ? 'active' : ''} aria-current={window.location.pathname === '/donor/new' ? 'page' : undefined} href="/donor/new"><Icon name="plus" />Create donation</a>
+                <a className={window.location.pathname === '/donor/history' ? 'active' : ''} aria-current={window.location.pathname === '/donor/history' ? 'page' : undefined} href="/donor/history"><Icon name="history" />Donation history</a>
+              </>}
+              {state.profile.role === 'volunteer' && <a className={window.location.pathname === '/volunteer/grabboard' ? 'active' : ''} aria-current={window.location.pathname === '/volunteer/grabboard' ? 'page' : undefined} href="/volunteer/grabboard"><Icon name="food" />GrabBoard</a>}
+            </nav><div className="sidebar-bottom"><span className="role-chip">{state.profile.role === 'ngo' ? 'NGO' : state.profile.role === 'donor' ? 'Donor' : 'Volunteer'} workspace</span><p>Good food deserves<br />a second chance.</p><Icon name="plate" /></div>
+          </aside><div className="workspace" id="main-content">
           {state.profile.role === 'donor' && requestedRole === 'donor' &&
             (window.location.pathname === '/donor/new' ? <DonationForm userId={userId} />
               : window.location.pathname === '/donor/history' ? <DonationHistory userId={userId} />
@@ -45,12 +54,13 @@ export function ProfileManagement({ userId }: { userId: string }) {
           {state.profile.role === 'volunteer' && requestedRole === 'volunteer' &&
             (window.location.pathname === '/volunteer/grabboard' ? <GrabBoard userId={userId} /> : <VolunteerDashboard profile={state.profile} />)}
           {state.profile.role === 'ngo' && requestedRole === 'ngo' && <NGODashboard />}
+          </div>
         </>
       ) : state.error ? (
         <button onClick={() => void state.retry()}>Retry profile</button>
       ) : (
         <>
-          <h2>Choose your role</h2>
+          <p className="eyebrow">Make yourself at home</p><h2>Choose your role</h2>
           <p>Select the role you will use for this account. This choice is permanent.</p>
           <form onSubmit={submit}>
             <fieldset disabled={state.saving}>
