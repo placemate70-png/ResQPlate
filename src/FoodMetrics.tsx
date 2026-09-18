@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { correctPlates } from './donationService'
 import type { Donation } from './donationService'
-import { calculateFreshness, deadlineState } from './foodLogic'
+import { calculateFreshness, deadlineState, formatCountdown, freshnessLabel } from './foodLogic'
 import { asyncError } from './useDonations'
 import { Icon, StatusBadge } from './UI'
 
@@ -23,13 +23,13 @@ export function FoodMetrics({ donation, editable = false }: { donation: Donation
       setCorrected(row.corrected_plates); setMessage('Plate count saved.')
     } catch (reason) { setError(asyncError(reason)) } finally { setSaving(false) }
   }
-  const freshnessStatus = freshness.expired ? 'expired' : freshness.remainingMs <= 3600000 ? 'expiring' : 'fresh'
   const { remainingMs: remaining, urgency } = deadlineState(donation.freshness_expires_at, now)
+  const freshnessStatus = urgency === 'EXPIRED' ? 'expired' : urgency === 'NORMAL' ? 'fresh' : 'expiring'
   return <div className="food-metrics">
     <div className="metrics"><div className={`metric-panel metric-${freshnessStatus}`}>
-      <span className="metric-label"><Icon name="clock" />FreshClock <StatusBadge status={freshnessStatus} /></span>
-      <strong className="metric-value">{freshness.expired ? 'Window ended' : `${Math.ceil(freshness.remainingMs / 60000)} min`}</strong>
-      <progress aria-label="Freshness window remaining" max={freshness.hours * 3600000} value={Math.min(freshness.remainingMs, freshness.hours * 3600000)} />
+      <span className="metric-label"><Icon name="clock" />FreshClock <span className={`badge badge-${freshnessStatus}`}><span className="status-dot" />{freshnessLabel(urgency)}</span></span>
+      <strong className="metric-value" aria-label="FreshClock time remaining">{formatCountdown(remaining)}</strong>
+      <progress aria-label="Freshness window remaining" max={freshness.hours * 3600000} value={Math.min(remaining, freshness.hours * 3600000)} />
       <small>Deadline: {new Date(donation.freshness_expires_at).toLocaleString()}</small>
       <small>LiveDeadline: {urgency} · {Math.ceil(remaining / 60000)} min remaining · Rescue: {donation.status}</small>
     </div><div className="metric-panel"><span className="metric-label"><Icon name="plate" />PlateCount</span>

@@ -15,6 +15,17 @@ export function deadlineState(expiresAt: string, now = Date.now()) {
   return { remainingMs, urgency }
 }
 
+export function formatCountdown(remainingMs: number) {
+  if (!Number.isFinite(remainingMs)) throw new Error('Invalid countdown')
+  const seconds = Math.ceil(Math.max(0, remainingMs) / 1000)
+  return [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60]
+    .map(value => String(value).padStart(2, '0')).join(':')
+}
+
+export function freshnessLabel(urgency: ReturnType<typeof deadlineState>['urgency']) {
+  return { NORMAL: 'FRESH', WARNING: 'USE SOON', CRITICAL: 'URGENT', EXPIRED: 'EXPIRED' }[urgency]
+}
+
 // Prototype serving assumptions: 300 g or 300 ml per plate; portions already count plates.
 export function estimatePlates(quantity: number, unit: 'kg' | 'litres' | 'portions', containers: number, capacityLitres?: number | null) {
   if (!(quantity > 0) || !Number.isInteger(containers) || containers < 1 || (capacityLitres != null && !(capacityLitres > 0))) throw new Error('Invalid quantity/container inputs')

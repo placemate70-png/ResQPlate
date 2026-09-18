@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { calculateFreshness, estimatePlates, deadlineState } from '../src/foodLogic.ts'
+import { calculateFreshness, estimatePlates, deadlineState, formatCountdown, freshnessLabel } from '../src/foodLogic.ts'
 const prepared = '2026-09-18T00:00:00Z'
 for (const type of ['gravy', 'dry', 'rice']) for (const temperature of [29.9, 30, 38, 38.1]) {
   const expected = (type === 'gravy' ? 1.5 : 4) + (temperature < 30 ? 1 : 0)
@@ -17,4 +17,9 @@ for (const [remaining, expected] of [[3600001,'NORMAL'],[3600000,'WARNING'],[900
   assert.equal(deadlineState(new Date(4000000).toISOString(),4000000-remaining).urgency,expected)
 }
 assert.throws(()=>deadlineState('invalid'))
+for (const [ms, display] of [[9258000,'02:34:18'],[3600000,'01:00:00'],[60000,'00:01:00'],[1000,'00:00:01'],[1,'00:00:01'],[0,'00:00:00'],[-1000,'00:00:00'],[90000000,'25:00:00']]) {
+  assert.equal(formatCountdown(ms),display)
+}
+assert.throws(()=>formatCountdown(NaN))
+assert.deepEqual(['NORMAL','WARNING','CRITICAL','EXPIRED'].map(freshnessLabel),['FRESH','USE SOON','URGENT','EXPIRED'])
 console.log('PASS FreshClock temperature/food/expiry boundaries and PlateCount quantities/capacity.')
