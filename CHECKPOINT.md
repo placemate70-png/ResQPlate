@@ -1,7 +1,7 @@
 CHECKPOINT
-PHASE: Remaining supported product features; existing Phase 1 + Phase 2 preserved.
-COMPLETED: Stored LiveDeadline urgency; persisted NGO availability; atomic assignment/pickup/NGO receipt; completed-only ImpactFeed; actual volunteer delivery/plate metrics. Explicit unavailable states and typed provider boundaries for SnapFill, GPS/maps/ETA, SmartReassign and SafeCall.
-FILES: src/integrations.ts, src/DonationForm.tsx, src/foodLogic.ts, src/FoodMetrics.tsx, src/rescueService.ts, src/useRescues.ts, src/RescuePanel.tsx, src/GrabBoard.tsx, src/NGODashboard.tsx, src/ProfileManagement.tsx, supabase/migrations/202609180009_rescue_progress.sql, tests/rescues.mjs, tests/foodLogic.mjs, README.md, CHECKPOINT.md.
-DB: Migration 009 applied: role/owner availability RLS and server timestamps; participant-only rescue reads, RPC-only writes; row locks, freshness checks, assigned NGO receipt, idempotent completion, privacy-limited completed feed. No contacts or frontend secrets. No realtime publication; explicit refresh used.
-VERIFY: PASS - typecheck/lint/build, logic boundaries, live progress/RLS/persistence/impact tests; browser availability/pickup/receipt/feed refresh, donor create/private image/metrics refresh, role guards, logout/anonymous guard, clean runtime. Phase 1 and Phase 2 live regressions passed. Server-only expiry and expanded rescue tests also passed (closed NGO denial, negative receipt rejection, incomplete claims excluded).
-NEXT: Push the verified commit to existing main/Vercel deployment. Connect real server-side inference/location/monitoring/private-call providers before enabling unavailable capabilities.
+SLICE: 1 - SnapFill Gemini.
+COMPLETED: Deployed Gemini 3.1 Flash-Lite; real food-photo analysis, editable suggestions, review gate, donor correction, donation creation, private image upload and refresh persistence verified.
+FILES: src/{DonationForm,ImageUpload,SnapFill}.tsx, src/{integrations,snapFillService,useSnapFill}.ts, supabase/config.toml, supabase/functions/snapfill/{index,handler,contract}.ts, tests/snapfill{,-live}.mjs, .gitignore, README.md, CHECKPOINT.md.
+DB: NONE. JWT verification, donor checks, RLS and private Storage preserved. GEMINI_API_KEY stays server-only.
+VERIFY: PASS - typecheck/lint/build/Deno, controlled handler tests, real deployed Gemini API, browser flow. Older model returned 404; compatible stable 3.1 model passed.
+NEXT: Slice 2 - FreshClock HH:MM:SS countdown.

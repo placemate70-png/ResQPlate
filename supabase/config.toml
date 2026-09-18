@@ -1,0 +1,2 @@
+[functions.snapfill]
+verify_jwt = true

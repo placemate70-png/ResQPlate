@@ -6,11 +6,22 @@ import { ImageUpload } from './ImageUpload'
 import { FoodMetrics } from './FoodMetrics'
 import { estimatePlates } from './foodLogic'
 import { Icon, LoadingState, PageHeading } from './UI'
-import { unavailableCapabilities } from './integrations'
+import { SnapFill } from './SnapFill'
+import type { FoodAnalysis } from './snapFillService'
+import { analysisFields } from './snapFillService'
 
 export function DonationForm({ userId }: { userId: string }) {
   const state = useCreateDonation()
   const [formError, setFormError] = useState('')
+  const [photo,setPhoto]=useState<File | null>(null)
+  const [fields,setFields]=useState<Record<string,string>>({quantity_unit:'kg'})
+  const [applied,setApplied]=useState(false)
+  const [confirmed,setConfirmed]=useState(false)
+  function field(name: string) { return {value:fields[name]??'',onChange:(event:{target:{value:string}})=>setFields(previous=>({...previous,[name]:event.target.value}))} }
+  function apply(result: FoodAnalysis) {
+    setFields(previous=>({...previous,...analysisFields(result)}))
+    setApplied(true); setConfirmed(false)
+  }
   if (state.restoring) return <LoadingState label="Loading saved donation…" />
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -35,20 +46,20 @@ export function DonationForm({ userId }: { userId: string }) {
     {formError && <p role="alert">{formError}</p>}
     {state.result ? <><p role="status">Donation saved: {state.result.food_name}. Status: {state.result.status}.</p>
       <div className="form-section"><h3>{state.result.food_name}</h3><FoodMetrics key={state.result.id} donation={state.result} editable /></div>
-      <ImageUpload userId={userId} donationId={state.result.id} imagePath={state.result.image_path} /></> :
+      <ImageUpload userId={userId} donationId={state.result.id} imagePath={state.result.image_path} selectedFile={photo} /></> :
       <form className="donation-form" onSubmit={submit}><fieldset disabled={state.saving}>
-        <div className="form-section"><h3>01 · The food</h3><p>Tell us what you’re sharing.</p><p>{unavailableCapabilities.snapFill}</p><div className="form-grid"><div className="field">
+        <div className="form-section"><h3>01 · The food</h3><p>Tell us what you’re sharing.</p><SnapFill onPhoto={setPhoto} onApply={apply} /><div className="form-grid"><div className="field">
         <label htmlFor="food_name">Food name</label>
-        <input id="food_name" name="food_name" required maxLength={120} />
+        <input id="food_name" name="food_name" required maxLength={120} {...field('food_name')} />
         </div><div className="field">
         <label htmlFor="food_type">Food type</label>
-        <select id="food_type" name="food_type" required defaultValue="">
+        <select id="food_type" name="food_type" required {...field('food_type')}>
           <option value="" disabled>Select food type</option><option value="gravy">Gravy</option>
           <option value="dry">Dry food</option><option value="rice">Rice</option>
         </select>
         </div><div className="field field-wide">
         <label htmlFor="description">Food details</label>
-        <textarea id="description" name="description" maxLength={1000} />
+        <textarea id="description" name="description" maxLength={1000} {...field('description')} />
         </div></div></div>
         <div className="form-section"><h3>02 · Freshness</h3><p>Temperature and preparation time inform the existing FreshClock estimate.</p><div className="form-grid"><div className="field">
         <label htmlFor="temperature_c">Temperature (°C)</label>
@@ -57,15 +68,15 @@ export function DonationForm({ userId }: { userId: string }) {
         <input id="prepared_at" name="prepared_at" type="datetime-local" required /></div></div></div>
         <div className="form-section"><h3>03 · Quantity & containers</h3><p>Enter the total quantity across all containers. PlateCount estimates servings from this amount.</p><div className="form-grid"><div className="field">
         <label htmlFor="quantity">Quantity</label>
-        <input id="quantity" name="quantity" type="number" required min="0.01" step="0.01" />
+        <input id="quantity" name="quantity" type="number" required min="0.01" step="0.01" {...field('quantity')} />
         </div><div className="field">
         <label htmlFor="quantity_unit">Quantity unit</label>
-        <select id="quantity_unit" name="quantity_unit" defaultValue="kg">
+        <select id="quantity_unit" name="quantity_unit" {...field('quantity_unit')}>
           <option value="kg">kg</option><option value="litres">litres</option><option value="portions">portions</option>
         </select>
         </div><div className="field field-wide">
         <label htmlFor="container">Container/vessel details</label>
-        <input id="container" name="container" required maxLength={200} />
+        <input id="container" name="container" required maxLength={200} {...field('container')} />
         </div><div className="field">
         <label htmlFor="container_count">Number of containers</label>
         <input id="container_count" name="container_count" type="number" required min={1} step={1} />
@@ -80,6 +91,7 @@ export function DonationForm({ userId }: { userId: string }) {
         <label htmlFor="longitude">Pickup longitude</label>
         <input id="longitude" name="longitude" type="number" required min="-180" max="180" step="any" />
         </div></div></div>
+        {applied && <div className="form-section"><label><input type="checkbox" required checked={confirmed} onChange={event=>setConfirmed(event.target.checked)} /> I reviewed and confirmed the editable AI estimates, including quantity. Food safety must be checked separately.</label></div>}
         <div className="form-footer"><p>After saving, attach your food image. RouteBuddy holds the donation for 180 seconds before release.</p>
         <button type="submit">{state.saving ? 'Saving donation…' : 'Submit donation'}<Icon name="arrow" /></button></div>
       </fieldset></form>}
