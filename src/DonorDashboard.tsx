@@ -8,7 +8,7 @@ import { ImpactStats } from './ImpactStats'
 export function DonorDashboard({ userId }: { userId: string }) {
   const state = useDonations(userId)
   const progress=useRescues()
-  return <section><PageHeading title="Donor dashboard" eyebrow="Your food, a new purpose" description="Welcome back. Here’s where your shared meals stand."
+  return <section><PageHeading title="Your impact center" eyebrow="Your food, a new purpose" description="Every donation can become someone’s meal. Here’s where your shared food stands."
     action={<a className="button-link" href="/donor/new"><Icon name="plus" />Create donation</a>} />
     {state.loading ? <LoadingState label="Loading donations…" />
       : state.error ? <p role="alert">{state.error}</p>

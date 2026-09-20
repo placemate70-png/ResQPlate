@@ -2,10 +2,10 @@ import { useSnapFill } from './useSnapFill'
 import type { FoodAnalysis } from './snapFillService'
 export function SnapFill({onPhoto,onApply}: {onPhoto:(photo: File | null)=>void; onApply:(result:FoodAnalysis)=>void}) {
   const state=useSnapFill()
-  return <div className="upload-panel"><h3>SnapFill · AI visual estimates</h3>
+  return <div className="upload-panel snapfill-panel"><span className="snapfill-badge">AI assisted</span><h3>Snap your food</h3>
     <p>Suggestions assist data entry. A photo cannot verify food safety, temperature or preparation time. You must review every estimate.</p>
-    <label htmlFor="snapfill-image">Food photo for SnapFill (JPEG, PNG, WebP; max 5 MB)</label>
-    <input id="snapfill-image" type="file" accept="image/jpeg,image/png,image/webp" disabled={state.pending} onChange={event=>{
+    <label className="snapfill-drop" htmlFor="snapfill-image"><span>Choose a clear food photo</span><small>JPEG, PNG or WebP · up to 5 MB</small></label>
+    <input className="sr-only" id="snapfill-image" type="file" accept="image/jpeg,image/png,image/webp" disabled={state.pending} onChange={event=>{
       const photo=event.target.files?.[0]??null
       onPhoto(state.select(photo))
     }} />

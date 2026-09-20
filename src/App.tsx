@@ -3,11 +3,12 @@ import type { FormEvent } from 'react'
 import { useAuth } from './useAuth'
 import { ProfileManagement } from './ProfileManagement'
 import { Brand, Icon, LoadingState } from './UI'
+import { Landing } from './Landing'
 
 function App() {
   const auth = useAuth()
-  const [mode, setMode] = useState<'login' | 'signup'>('login')
   const path = window.location.pathname
+  const [mode, setMode] = useState<'login' | 'signup'>(path === '/signup' ? 'signup' : 'login')
   const dashboard = path === '/dashboard'
   const protectedArea = dashboard || /^\/(donor|volunteer|ngo)(\/|$)/.test(path)
   const callback = path === '/auth/callback'
@@ -29,6 +30,8 @@ function App() {
   if (auth.loading || (auth.session && !protectedArea) || (!auth.session && protectedArea)) {
     return <main className="session-loading"><Brand /><LoadingState label="Loading session…" /></main>
   }
+
+  if (!auth.session && path === '/') return <Landing />
 
   return (
     <main className={auth.session ? 'app-root' : 'auth-root'}>
@@ -66,9 +69,7 @@ function App() {
               <label htmlFor="email">Email</label>
               <input id="email" name="email" type="email" autoComplete="email" required />
               <label htmlFor="password">Password</label>
-              <input id="password" name="password" type="password"
-                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                minLength={mode === 'signup' ? 8 : undefined} required />
+              <PasswordField mode={mode} />
               {mode === 'signup' && <p>Use at least 8 characters. Confirm your email before logging in.</p>}
               <button type="submit">{auth.pending ? 'Please wait…' : mode === 'signup' ? 'Sign up' : 'Log in'}</button>
             </fieldset>
@@ -85,6 +86,13 @@ function App() {
       </div>}
     </main>
   )
+}
+
+function PasswordField({ mode }: { mode: 'login' | 'signup' }) {
+  const [visible, setVisible] = useState(false)
+  return <div className="password-field"><input id="password" name="password" type={visible ? 'text' : 'password'}
+    autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={mode === 'signup' ? 8 : undefined} required />
+    <button className="password-toggle" type="button" aria-label={visible ? 'Hide password' : 'Show password'} onClick={() => setVisible(value => !value)}><Icon name={visible ? 'eyeOff' : 'eye'} /></button></div>
 }
 
 export default App

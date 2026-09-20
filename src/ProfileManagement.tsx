@@ -46,7 +46,7 @@ export function ProfileManagement({ userId }: { userId: string }) {
                 <a className={window.location.pathname === '/donor/history' ? 'active' : ''} aria-current={window.location.pathname === '/donor/history' ? 'page' : undefined} href="/donor/history"><Icon name="history" />Donation history</a>
               </>}
               {state.profile.role === 'volunteer' && <a className={window.location.pathname === '/volunteer/grabboard' ? 'active' : ''} aria-current={window.location.pathname === '/volunteer/grabboard' ? 'page' : undefined} href="/volunteer/grabboard"><Icon name="food" />GrabBoard</a>}
-              {state.profile.role === 'volunteer' && <a href="/volunteer/rescue"><Icon name="route" />Active Rescue</a>}
+              {state.profile.role === 'volunteer' && <a className={window.location.pathname === '/volunteer/rescue' ? 'active' : ''} aria-current={window.location.pathname === '/volunteer/rescue' ? 'page' : undefined} href="/volunteer/rescue"><Icon name="route" />Active Rescue</a>}
             </nav><div className="sidebar-bottom"><span className="role-chip">{state.profile.role === 'ngo' ? 'NGO' : state.profile.role === 'donor' ? 'Donor' : 'Volunteer'} workspace</span><p>Good food deserves<br />a second chance.</p><Icon name="plate" /></div>
           </aside><div className="workspace" id="main-content">
           {state.profile.role === 'donor' && requestedRole === 'donor' &&
@@ -65,15 +65,12 @@ export function ProfileManagement({ userId }: { userId: string }) {
           <p className="eyebrow">Make yourself at home</p><h2>Choose your role</h2>
           <p>Select the role you will use for this account. This choice is permanent.</p>
           <form onSubmit={submit}>
-            <fieldset disabled={state.saving}>
-              <label htmlFor="role">Role</label>
-              <select id="role" name="role" defaultValue="" required>
-                <option value="" disabled>Select a role</option>
-                <option value="donor">Donor</option>
-                <option value="volunteer">Volunteer</option>
-                <option value="ngo">NGO</option>
-              </select>
-              <button type="submit">{state.saving ? 'Saving role…' : 'Save role'}</button>
+            <fieldset disabled={state.saving} className="role-picker">
+              <legend className="sr-only">Choose your permanent role</legend>
+              <label className="role-card"><input type="radio" name="role" value="donor" required /><span className="role-card-icon"><Icon name="food" /></span><span><strong>Donor</strong><small>Share surplus food</small></span><Icon name="arrow" /></label>
+              <label className="role-card"><input type="radio" name="role" value="volunteer" /><span className="role-card-icon"><Icon name="route" /></span><span><strong>Volunteer</strong><small>Rescue and deliver</small></span><Icon name="arrow" /></label>
+              <label className="role-card"><input type="radio" name="role" value="ngo" /><span className="role-card-icon"><Icon name="users" /></span><span><strong>NGO</strong><small>Receive and distribute</small></span><Icon name="arrow" /></label>
+              <button type="submit">{state.saving ? 'Saving role…' : 'Continue with this role'}<Icon name="arrow" /></button>
             </fieldset>
           </form>
         </>

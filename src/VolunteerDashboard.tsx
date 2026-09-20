@@ -8,7 +8,7 @@ import { ImpactStats } from './ImpactStats'
 export function VolunteerDashboard({ profile }: { profile: Profile }) {
   const state = useGrabBoard(profile.id)
   const progress=useRescues()
-  return <section><PageHeading title="Volunteer dashboard" eyebrow="Be the connection" description="Good food is waiting for its next chapter. Help it get there."
+  return <section><PageHeading title="Ready to rescue?" eyebrow="Volunteer operations" description="Good food is waiting for its next chapter. Find it, collect it, and help it arrive safely."
     action={<a className="button-link" href="/volunteer/grabboard">Open GrabBoard <Icon name="arrow" /></a>} />
     {state.loading ? <LoadingState label="Loading reservation state…" />
       : state.error ? <p role="alert">{state.error}</p>

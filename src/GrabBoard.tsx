@@ -8,7 +8,10 @@ import { useState } from 'react'
 export function GrabBoard({ userId }: { userId: string }) {
   const state = useGrabBoard(userId)
   const [distances,setDistances]=useState<{donation_id:string;distance_km:number}[]>([])
-  return <section><PageHeading title="GrabBoard" eyebrow="Find your next food rescue" description="Real donations, ready to share. Reserve first, then confirm within 60 seconds."
+  const [query,setQuery]=useState('')
+  const [freshness,setFreshness]=useState('all')
+  const visible=state.donations.filter(row=>row.food_name.toLowerCase().includes(query.toLowerCase()) && (freshness==='all' || state.serverNow!==null && (freshness==='urgent' && Date.parse(row.freshness_expires_at)-state.serverNow<=3600000 || freshness==='fresh' && Date.parse(row.freshness_expires_at)-state.serverNow>3600000)))
+  return <section><PageHeading title="Available rescues" eyebrow="GrabBoard · live operations" description="Find nearby food that needs immediate pickup. Reserve first, then confirm within 60 seconds."
     action={<button className="button-secondary" disabled={state.loading} onClick={() => void state.refresh()}><Icon name="history" />{state.loading ? 'Refreshing…' : 'Refresh donations'}</button>} />
     {state.error && <p role="alert">{state.error}</p>}
     {state.notice && <p role="status">{state.notice}</p>}
@@ -28,11 +31,13 @@ export function GrabBoard({ userId }: { userId: string }) {
         </div> : <div className="confirmed-note"><Icon name="check" />Claim confirmed. <a href={`/volunteer/rescue?rescue=${row.id}`}>View Rescue</a></div>}
       </div>
     })}</div>
-    <div className="section-heading"><h3>Available donations</h3><span className="role-chip">{state.donations.length} available</span></div>
+    <div className="section-heading"><h3>Available donations</h3><span className="role-chip">{visible.length} shown</span></div>
+    <div className="board-toolbar"><label><span>Search rescues</span><input type="search" placeholder="Search by food" value={query} onChange={event=>setQuery(event.target.value)}/></label><label><span>Freshness</span><select value={freshness} onChange={event=>setFreshness(event.target.value)}><option value="all">All freshness</option><option value="fresh">Fresh</option><option value="urgent">Use soon</option></select></label></div>
     <BoardDistances donations={state.donations} onDistances={setDistances}/>
     {state.loading ? <LoadingState label="Loading available donations…" />
-      : !state.donations.length ? <EmptyState title="Nothing ready to reserve right now" description="New donations appear after their RouteBuddy matching window. This board updates automatically; check back soon." />
-      : <div className="donation-grid">{state.donations.map(row => <div className="donation-card" key={row.id}><DonationDetails donation={row} />
+      : !state.donations.length ? <EmptyState title="You’re all caught up" description="New donations appear after their RouteBuddy matching window. This board updates automatically." />
+      : !visible.length ? <EmptyState title="No rescues match these filters" description="Try a different food name or freshness range." />
+      : <div className="donation-grid">{visible.map(row => <div className="donation-card" key={row.id}><DonationDetails donation={row} />
         {distances.some(d=>d.donation_id===row.id) && <p className="confirmed-note">{distances.find(d=>d.donation_id===row.id)!.distance_km.toFixed(2)} km straight-line distance</p>}
         <div className="card-actions"><button disabled={state.pending} onClick={() => void state.reserve(row.id)}>{state.pending ? 'Please wait…' : `Reserve ${row.food_name}`}<Icon name="arrow" /></button></div>
       </div>)}</div>}
