@@ -3,6 +3,8 @@ import type { FormEvent } from 'react'
 import { useAuth } from './useAuth'
 import { ProfileManagement } from './ProfileManagement'
 import { Brand, Icon, LoadingState } from './UI'
+import authPeople from './assets/food-rescue-cutout.webp'
+import authMeal from './assets/community-meal.webp'
 const Landing = lazy(() => import('./Landing').then(module => ({ default: module.Landing })))
 
 function App() {
@@ -49,11 +51,11 @@ function App() {
           <ProfileManagement key={auth.session.user.id} userId={auth.session.user.id} />
         </>
       ) : <div className="auth-layout">
-        <aside className="auth-story"><Brand /><div className="auth-story-content"><p className="eyebrow">Good food. Greater purpose.</p>
-          <h1>More than a plate.<br /><span>A new possibility.</span></h1><p>Connect surplus food with the people who need it. One thoughtful donation at a time.</p>
-          <div className="plate-art" aria-hidden="true"><span className="plate-ring"><Icon name="food" /></span><span className="art-label"><Icon name="check" /> Every meal matters</span></div>
-          <div className="rescue-path"><span>Donate</span><Icon name="arrow" /><span>Rescue</span><Icon name="arrow" /><span>Share</span></div>
-        </div><p className="auth-story-footer">Built around food, freshness, and community.</p></aside>
+        <aside className="auth-story"><div className="auth-brand"><Brand /><p>Rescue food. Share hope.</p></div><div className="auth-story-content">
+          <h1>Good food<br /><span>should be shared.</span></h1>
+          <div className="auth-visual-story"><span className="auth-shape" aria-hidden="true"/><img className="auth-people" src={authPeople} alt="A meal being served in a community kitchen" /><img className="auth-meal" src={authMeal} alt="People sharing a meal together" /></div>
+          <div className="auth-flow" aria-label="Food rescue in three steps"><div className="auth-step"><span><Icon name="food" /></span><strong>Extra food</strong><small>Have food?</small></div><Icon name="arrow" className="auth-flow-arrow"/><div className="auth-step"><span><Icon name="heart" /></span><strong>We pick it up</strong><small>Someone helps.</small></div><Icon name="arrow" className="auth-flow-arrow"/><div className="auth-step"><span><Icon name="users" /></span><strong>Food is shared</strong><small>People receive it.</small></div></div>
+        </div><p className="auth-story-footer"><Icon name="check" /> Every meal matters.</p></aside>
         <section className="auth-panel" id="main-content">
           <div className="auth-panel-inner"><p className="eyebrow">Welcome to ResQPlate</p>
           {auth.error && <p role="alert">{auth.error}</p>}{auth.notice && <p role="status">{auth.notice}</p>}
@@ -67,7 +69,7 @@ function App() {
           <form className="auth-form" key={mode} onSubmit={submit}>
             <fieldset disabled={auth.pending}>
               <label htmlFor="email">Email</label>
-              <input id="email" name="email" type="email" autoComplete="email" required />
+              <div className="input-with-icon"><Icon name="mail"/><input id="email" name="email" type="email" placeholder="Enter your email" autoComplete="email" required /></div>
               <label htmlFor="password">Password</label>
               <PasswordField mode={mode} />
               {mode === 'signup' && <p>Use at least 8 characters. Confirm your email before logging in.</p>}
@@ -90,7 +92,7 @@ function App() {
 
 function PasswordField({ mode }: { mode: 'login' | 'signup' }) {
   const [visible, setVisible] = useState(false)
-  return <div className="password-field"><input id="password" name="password" type={visible ? 'text' : 'password'}
+  return <div className="password-field input-with-icon"><Icon name="lock"/><input id="password" name="password" type={visible ? 'text' : 'password'} placeholder="Enter your password"
     autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={mode === 'signup' ? 8 : undefined} required />
     <button className="password-toggle" type="button" aria-label={visible ? 'Hide password' : 'Show password'} onClick={() => setVisible(value => !value)}><Icon name={visible ? 'eyeOff' : 'eye'} /></button></div>
 }
