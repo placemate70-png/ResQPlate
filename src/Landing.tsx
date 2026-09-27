@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import heroImage from './assets/food-rescue-hero.webp'
+import heroCutout from './assets/food-rescue-cutout.webp'
+import mealHall from './assets/meal-hall.webp'
+import communityMeal from './assets/community-meal.webp'
+import communityServing from './assets/community-serving.webp'
 import { Brand, Icon } from './UI'
 
 const journey = [
@@ -33,13 +36,13 @@ export function Landing() {
         <div className="hero-actions"><a className="button-link button-large" href="/signup">Donate food <Icon name="arrow" /></a><a className="button-link button-secondary button-large" href="/signup">Become a volunteer</a></div>
         <div className="trust-row"><span><Icon name="check" /> Real donations</span><span><Icon name="check" /> Secure coordination</span><span><Icon name="check" /> Confirmed receipt</span></div>
       </div>
-      <div className="hero-photo-wrap"><img src={heroImage} alt="A community kitchen donor handing prepared food containers to a volunteer" />
-        <div className="photo-caption"><span className="journey-icon"><Icon name="heart" /></span><span><strong>Food rescue in motion</strong>From a caring kitchen to community impact</span></div>
+      <div className="hero-cutout-wrap"><span className="hero-sun" aria-hidden="true"/><img src={heroCutout} alt="A community kitchen serving a fresh meal to a smiling student" />
+        <div className="photo-caption"><span className="journey-icon"><Icon name="heart" /></span><span><strong>Food creates connection</strong>From a caring kitchen to a shared meal</span></div>
       </div>
     </section>
     <section className="landing-strip" aria-label="ResQPlate trust bar"><span>Fresh food</span><Icon name="arrow"/><span>Fast coordination</span><Icon name="arrow"/><span>Responsible delivery</span><Icon name="arrow"/><span>Verified impact</span></section>
 
-    <section className="story-section" id="impact"><div className="story-image"><img src={heroImage} alt="Prepared food ready for a community rescue" /></div><div className="story-copy"><p className="eyebrow">Why ResQPlate?</p><h2>From surplus food to shared good.</h2><p>Every day, perfectly usable food can go uneaten while communities need it. ResQPlate creates a simple, accountable bridge between the people who have food and the people who can put it to use.</p><div className="story-chain"><span>Donors</span><Icon name="arrow"/><span>Volunteers</span><Icon name="arrow"/><span>NGOs</span><Icon name="arrow"/><span>People</span></div></div></section>
+    <section className="story-section" id="impact"><div className="story-mosaic"><img className="story-tall" src={mealHall} alt="A shared dining hall prepared with meals" /><img src={communityMeal} alt="Children sharing a community meal" /><img src={communityServing} alt="Volunteers serving prepared food" /></div><div className="story-copy"><p className="eyebrow">Why ResQPlate?</p><h2>From surplus food to shared good.</h2><p>Every day, perfectly usable food can go uneaten while communities need it. ResQPlate creates a simple, accountable bridge between the people who have food and the people who can put it to use.</p><div className="story-chain"><span>Donors</span><Icon name="arrow"/><span>Volunteers</span><Icon name="arrow"/><span>NGOs</span><Icon name="arrow"/><span>People</span></div></div></section>
 
     <section className="landing-section process-section" id="how-it-works"><div className="landing-section-heading"><p className="eyebrow">One connected journey</p><h2>Rescue food in five clear steps.</h2><p>Everyone knows what happens next, and every update comes from the real rescue workflow.</p></div>
       <div className="journey-grid">{journey.map((step,index)=><article className="journey-card" key={step.label}><span className="journey-number">0{index+1}</span><span className="journey-icon"><Icon name={step.icon}/></span><h3>{step.label}</h3><p>{step.text}</p>{index<journey.length-1&&<Icon name="arrow" className="journey-arrow"/>}</article>)}</div>
