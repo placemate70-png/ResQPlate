@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useAuth } from './useAuth'
 import { ProfileManagement } from './ProfileManagement'
 import { Brand, Icon, LoadingState } from './UI'
-import { Landing } from './Landing'
+const Landing = lazy(() => import('./Landing').then(module => ({ default: module.Landing })))
 
 function App() {
   const auth = useAuth()
@@ -31,7 +31,7 @@ function App() {
     return <main className="session-loading"><Brand /><LoadingState label="Loading session…" /></main>
   }
 
-  if (!auth.session && path === '/') return <Landing />
+  if (!auth.session && path === '/') return <Suspense fallback={<main className="session-loading"><Brand /><LoadingState label="Loading ResQPlate…" /></main>}><Landing /></Suspense>
 
   return (
     <main className={auth.session ? 'app-root' : 'auth-root'}>
